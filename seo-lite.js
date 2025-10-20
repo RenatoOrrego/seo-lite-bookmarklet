@@ -1,4 +1,4 @@
-(async function(){
+async function runSeoLite(){
 if(document.getElementById('dseButton'))return;
 const style=document.createElement('style');
 style.textContent=`
@@ -198,4 +198,4 @@ document.getElementById('hreflangContent').innerHTML=await buildHreflang();
 document.getElementById('headingsContent').innerHTML=await buildHeadings();
 document.getElementById('imagesContent').innerHTML=await buildImages();
 document.getElementById('linksContent').innerHTML=await buildLinks();
-})();
+runSeoLite();
