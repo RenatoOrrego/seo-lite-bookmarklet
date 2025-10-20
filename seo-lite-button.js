@@ -1,13 +1,13 @@
 (async function() {
-  // Evitar duplicados
+  
   if (document.getElementById('dseButton')) return;
 
-  // Esperar a que el DOM esté completamente cargado
+  
   if (document.readyState === 'loading') {
     await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
   }
 
-  // Estilos
+  
   const style = document.createElement('style');
   style.textContent = `
     #dseButton {
@@ -79,14 +79,14 @@
   `;
   document.head.appendChild(style);
 
-  // Botón flotante
+  
   const btn = document.createElement('button');
   btn.id = 'dseButton';
   btn.title = 'Abrir SEO Analyzer';
   btn.innerHTML = '🔍';
   document.body.appendChild(btn);
 
-  // Panel
+  
   const panel = document.createElement('div');
   panel.id = 'dsePanel';
   panel.innerHTML = `
@@ -108,7 +108,7 @@
   `;
   document.body.appendChild(panel);
 
-  // Toggle panel
+  
   const togglePanel = () => {
     const isHidden = panel.style.display === 'none' || !panel.style.display;
     panel.style.display = isHidden ? 'block' : 'none';
@@ -118,7 +118,7 @@
   btn.onclick = togglePanel;
   panel.querySelector('#dseCloseBtn').onclick = () => panel.style.display = 'none';
 
-  // Tabs
+  
   panel.querySelectorAll('.dse-tab').forEach(tab => {
     tab.onclick = () => {
       panel.querySelectorAll('.dse-tab').forEach(t => t.classList.remove('active'));
@@ -128,7 +128,7 @@
     };
   });
 
-  // Draggable button
+  
   let offsetX, offsetY, dragging = false;
   btn.addEventListener('mousedown', e => {
     dragging = true;
@@ -147,7 +147,7 @@
     btn.style.transition = '';
   });
 
-  // Helper functions
+  
   const escapeHtml = t => (t || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 
   const buildOverview = () => {
@@ -303,7 +303,7 @@
     return html;
   };
 
-  // Análisis completo
+  
   const analyzeAll = () => {
     try {
       document.getElementById('overviewContent').innerHTML = buildOverview();
@@ -317,7 +317,7 @@
     }
   };
 
-  // Ejecutar análisis inicial
+  
   analyzeAll();
 
   console.log('✅ SEO Analyzer cargado correctamente');
