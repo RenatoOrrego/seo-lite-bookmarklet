@@ -230,7 +230,7 @@
     return html;
   };
 
-  
+  // Llenar todo el contenido
   document.getElementById('overviewContent').innerHTML = buildOverview();
   document.getElementById('jsonldContent').innerHTML = buildJsonLD();
   document.getElementById('hreflangContent').innerHTML = buildHreflang();
