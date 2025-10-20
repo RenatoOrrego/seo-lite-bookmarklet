@@ -49,6 +49,7 @@
       min-height: 300px;
       background: #fff;
       border-radius: 12px;
+      border: 1px solid #ccc;
       padding: 0;
       box-shadow: 0 14px 40px rgba(0,0,0,.32);
       font-family: Inter, Arial, sans-serif;
@@ -57,7 +58,7 @@
       display: none;
       z-index: 999999999 !important;
       resize: both;
-      overflow: hidden;
+      overflow: auto;
       animation: slideIn 0.4s ease-out;
       transition: box-shadow .3s ease;
     }
@@ -71,13 +72,37 @@
       height: calc(100% - 41px);
       overflow: auto;
     }
+      
+    .dse-content h3 {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    padding: 8px 0;
+    z-index: 1;
+    border-bottom: 1px solid #eee;
+    }
+
+      
+    .dse-content {
+    padding: 12px 16px;
+    display: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .dse-content.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    }
+
 
     .dse-tabs { display:flex; border-bottom:1px solid #e6e6e6; background:#fafafa; border-radius:12px 12px 0 0 }
     .dse-tab { flex:1; padding:10px; text-align:center; cursor:pointer; font-weight:600; border-right:1px solid #eee }
     .dse-tab:last-child{border-right:none}
     .dse-tab.active{background:#fff;border-bottom:3px solid #1a73e8}
-    .dse-content{padding:12px 16px;display:none}
-    .dse-content.active{display:block}
+
     .dse-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
     .dse-table th,.dse-table td{border:1px solid #eee;padding:6px 8px;text-align:left}
     .dse-table th{background:#f6f8fb;font-weight:700}
