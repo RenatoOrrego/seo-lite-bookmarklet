@@ -72,43 +72,16 @@
       overflow: auto;
     }
 
-    .dse-tabs { display:flex; border-bottom:1px solid #e6e6e6; background:#fafafa; border-radius:12px 12px 0 0; position: sticky; top: 0; z-index: 10; }
-    .dse-tab { flex:1; padding:10px; text-align:center; cursor:pointer; font-weight:600; border-right:1px solid #eee; transition: all .3s ease; position: relative; overflow: hidden; }
-    .dse-tab::before {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      width: 0;
-      height: 3px;
-      background: #1a73e8;
-      transform: translateX(-50%);
-      transition: width .3s ease;
-    }
-    .dse-tab:hover {
-      background: #f0f0f0;
-    }
+    .dse-tabs { display:flex; border-bottom:1px solid #e6e6e6; background:#fafafa; border-radius:12px 12px 0 0 }
+    .dse-tab { flex:1; padding:10px; text-align:center; cursor:pointer; font-weight:600; border-right:1px solid #eee }
     .dse-tab:last-child{border-right:none}
-    .dse-tab.active{background:#fff; color: #1a73e8;}
-    .dse-tab.active::before {
-      width: 100%;
-    }
-    .dse-content{padding:12px 16px;display:none; animation: fadeIn 0.3s ease-out;}
+    .dse-tab.active{background:#fff;border-bottom:3px solid #1a73e8}
+    .dse-content{padding:12px 16px;display:none}
     .dse-content.active{display:block}
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .dse-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px; animation: slideIn 0.4s ease-out;}
-    .dse-table th,.dse-table td{border:1px solid #eee;padding:6px 8px;text-align:left; transition: background .2s ease;}
-    .dse-table tbody tr:hover {
-      background: #f9f9f9;
-    }
+    .dse-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+    .dse-table th,.dse-table td{border:1px solid #eee;padding:6px 8px;text-align:left}
     .dse-table th{background:#f6f8fb;font-weight:700}
-    .kv{display:flex;gap:8px;align-items:flex-start;margin:6px 0; padding: 8px; border-radius: 6px; transition: background .2s ease;}
-    .kv:hover {
-      background: #f5f5f5;
-    }
+    .kv{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
     .kv .k{width:180px;font-weight:700;color:#333}
     .kv .v{flex:1;color:#111;word-break:break-word}
     .small{font-size:12px;color:#666}
@@ -135,21 +108,17 @@
       <div class="dse-tab" data-tab="imagesTab">Images</div>
       <div class="dse-tab" data-tab="linksTab">Links</div>
     </div>
-    <div class="dse-panel-content">
-      <div class="dse-content active" id="overviewTab"><h3>Overview</h3><div id="overviewContent">Cargando...</div></div>
-      <div class="dse-content" id="jsonldTab"><h3>Schema.org JSON-LD</h3><div id="jsonldContent">Cargando...</div></div>
-      <div class="dse-content" id="hreflangTab"><h3>Hreflang</h3><div id="hreflangContent">Cargando...</div></div>
-      <div class="dse-content" id="headingsTab"><h3>Headings</h3><div id="headingsContent">Cargando...</div></div>
-      <div class="dse-content" id="imagesTab"><h3>Images</h3><div id="imagesContent">Cargando...</div></div>
-      <div class="dse-content" id="linksTab"><h3>Links</h3><div id="linksContent">Cargando...</div></div>
-    </div>
+    <div class="dse-content active" id="overviewTab"><h3>Overview</h3><div id="overviewContent">Cargando...</div></div>
+    <div class="dse-content" id="jsonldTab"><h3>Schema.org JSON-LD</h3><div id="jsonldContent">Cargando...</div></div>
+    <div class="dse-content" id="hreflangTab"><h3>Hreflang</h3><div id="hreflangContent">Cargando...</div></div>
+    <div class="dse-content" id="headingsTab"><h3>Headings</h3><div id="headingsContent">Cargando...</div></div>
+    <div class="dse-content" id="imagesTab"><h3>Images</h3><div id="imagesContent">Cargando...</div></div>
+    <div class="dse-content" id="linksTab"><h3>Links</h3><div id="linksContent">Cargando...</div></div>
   `;
   document.body.appendChild(panel);
 
   btn.onclick = () => {
-    const isHidden = panel.style.display === 'none' || !panel.style.display;
-    panel.style.display = isHidden ? 'block' : 'none';
-    btn.classList.toggle('active', isHidden);
+    panel.style.display = panel.style.display === 'none' || !panel.style.display ? 'block' : 'none';
     console.log('[SEO Panel] Panel toggled');
   };
 
@@ -158,10 +127,7 @@
       panel.querySelectorAll('.dse-tab').forEach(t=>t.classList.remove('active'));
       panel.querySelectorAll('.dse-content').forEach(c=>c.classList.remove('active'));
       tab.classList.add('active');
-      const targetContent = document.getElementById(tab.dataset.tab);
-      targetContent.classList.add('active');
-      // Scroll suave al cambiar de pestaña
-      targetContent.parentElement.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById(tab.dataset.tab).classList.add('active');
       console.log('[SEO Panel] Tab changed:', tab.dataset.tab);
     };
   });
@@ -185,30 +151,6 @@
     dragging = false;
     btn.style.transition = '';
   });
-
-  // Sistema de redimensionamiento mejorado
-  let resizing = false;
-  let resizeHandle = null;
-  
-  const enableResize = () => {
-    panel.style.resize = 'both';
-    panel.style.overflow = 'hidden';
-    
-    // Detectar cuando se está redimensionando
-    let resizeObserver = new ResizeObserver(() => {
-      if (!resizing && panel.offsetWidth !== parseInt(panel.style.width)) {
-        panel.classList.add('resizing');
-        resizing = true;
-        setTimeout(() => {
-          panel.classList.remove('resizing');
-          resizing = false;
-        }, 100);
-      }
-    });
-    resizeObserver.observe(panel);
-  };
-  
-  enableResize();
 
   const escapeHtml = t => {
     if (!t) return '';
