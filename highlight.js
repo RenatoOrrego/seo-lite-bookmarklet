@@ -1,3 +1,9 @@
+// ==UserScript==
+// @name         Resaltar NutriAdvance
+// @match        *://*/*
+// @grant        none
+// @run-at       document-end
+// ==/UserScript==
 (function(){
     var palabra = "NutriAdvance";
     var regex = new RegExp(palabra, "gi");
