@@ -1,4 +1,4 @@
-javascript:(function(){
+(function(){
 
   function extractCurrentPageSchemas() {
     const scripts = document.querySelectorAll('script[type="application/ld+json"]');
