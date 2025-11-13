@@ -1,5 +1,5 @@
-(function(){
-
+javascript:(function(){
+  // Función para extraer schemas de la página actual
   function extractCurrentPageSchemas() {
     const scripts = document.querySelectorAll('script[type="application/ld+json"]');
     if (scripts.length === 0) {
@@ -25,7 +25,7 @@
     return `<div style="color:#10b981;font-weight:bold;margin-bottom:10px;">✅ ${scripts.length} schema(s) encontrado(s)</div>${schemas}`;
   }
 
-
+  // Función optimizada con timeout y race entre proxies
   async function fetchSchema(url) {
     const proxies = [
       `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
@@ -33,7 +33,7 @@
       `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
     ];
 
-
+    // Timeout helper
     const fetchWithTimeout = (url, timeout = 8000) => {
       return Promise.race([
         fetch(url, { 
@@ -46,7 +46,7 @@
       ]);
     };
 
-
+    // Intentar todos los proxies en paralelo (race)
     const attempts = proxies.map(async (proxyUrl) => {
       try {
         const res = await fetchWithTimeout(proxyUrl);
@@ -58,7 +58,7 @@
       }
     });
 
-
+    // Esperar al primer proxy que responda exitosamente
     try {
       const results = await Promise.all(attempts);
       const successful = results.find(r => r.success);
@@ -109,6 +109,8 @@
     right:20px;
     width:480px;
     max-height:90vh;
+    min-width:350px;
+    min-height:400px;
     z-index:999999;
     background:#1e1e1e;
     color:#fff;
@@ -119,6 +121,7 @@
     font-family:'Monaco','Menlo','Consolas',monospace;
     display:flex;
     flex-direction:column;
+    resize:both;
   `;
 
   popup.innerHTML = `
@@ -142,13 +145,20 @@
       <div id="urlMode" style="display:none;">
         <textarea id="urlList" style="width:100%;height:90px;margin-bottom:10px;background:#111;color:#10b981;border:1px solid #333;border-radius:6px;padding:10px;font-family:inherit;font-size:12px;resize:vertical;" placeholder="Pega tus URLs aquí (una por línea)&#10;&#10;Ejemplo:&#10;https://ejemplo.com/pagina1&#10;https://ejemplo.com/pagina2&#10;&#10;⚠️ Nota: Puede fallar por CORS"></textarea>
         
-        <button id="getSchemas" style="width:100%;padding:12px;background:#0a84ff;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;transition:all 0.2s;">
-          🚀 Obtener Schemas
-        </button>
+        <div style="display:flex;gap:8px;">
+          <button id="getSchemas" style="flex:1;padding:12px;background:#0a84ff;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;transition:all 0.2s;">
+            🚀 Obtener Schemas
+          </button>
+          <button id="downloadCSV" style="padding:12px 16px;background:#10b981;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:14px;transition:all 0.2s;display:none;">
+            📥 CSV
+          </button>
+        </div>
       </div>
       
       <div id="results" style="margin-top:15px;"></div>
     </div>
+    
+    <div id="resizeHandle" style="position:absolute;bottom:0;left:0;width:20px;height:20px;cursor:nesw-resize;background:linear-gradient(45deg, #0a84ff 50%, transparent 50%);border-radius:0 0 0 12px;"></div>
   `;
 
   document.body.appendChild(popup);
@@ -158,18 +168,61 @@
   const toggleModeBtn = document.getElementById('toggleMode');
   const urlMode = document.getElementById('urlMode');
   const getBtn = document.getElementById('getSchemas');
+  const downloadBtn = document.getElementById('downloadCSV');
   const resultsDiv = document.getElementById('results');
+  const resizeHandle = document.getElementById('resizeHandle');
+
+  // Variable para almacenar datos de schemas
+  let schemaData = [];
 
   closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255,255,255,0.3)';
   closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255,255,255,0.2)';
   closeBtn.onclick = () => popup.remove();
+
+  // Resize functionality
+  let isResizing = false;
+  let startX, startY, startWidth, startHeight, startLeft;
+
+  resizeHandle.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startWidth = popup.offsetWidth;
+    startHeight = popup.offsetHeight;
+    startLeft = popup.offsetLeft;
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+    
+    const newWidth = startWidth - deltaX;
+    const newHeight = startHeight + deltaY;
+    
+    if (newWidth >= 350) {
+      popup.style.width = newWidth + 'px';
+      popup.style.left = (startLeft + deltaX) + 'px';
+      popup.style.right = 'auto';
+    }
+    if (newHeight >= 400) {
+      popup.style.height = newHeight + 'px';
+    }
+    popup.style.maxHeight = 'none';
+  });
+
+  document.addEventListener('mouseup', () => {
+    isResizing = false;
+  });
 
   // Botón para analizar página actual
   currentPageBtn.onclick = () => {
     resultsDiv.innerHTML = '<div style="background:#0f0f0f;padding:15px;border-radius:8px;">' + extractCurrentPageSchemas() + '</div>';
   };
 
-
+  // Toggle entre modos
   let showingUrlMode = false;
   toggleModeBtn.onclick = () => {
     showingUrlMode = !showingUrlMode;
@@ -178,6 +231,41 @@
     resultsDiv.innerHTML = '';
   };
 
+  // Función para descargar CSV
+  downloadBtn.onclick = () => {
+    if (schemaData.length === 0) {
+      alert('No hay datos para exportar. Primero obtén los schemas.');
+      return;
+    }
+
+    let csv = 'URL,Estado,Schemas Encontrados,Tipos de Schema,JSON\n';
+    
+    schemaData.forEach(item => {
+      const url = `"${item.url.replace(/"/g, '""')}"`;
+      const estado = item.success ? 'Exitoso' : 'Fallido';
+      const count = item.schemas.length;
+      const types = `"${item.schemas.map(s => s.type).join(', ')}"`;
+      const json = `"${JSON.stringify(item.schemas).replace(/"/g, '""')}"`;
+      
+      csv += `${url},${estado},${count},${types},${json}\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `schemas_${new Date().toISOString().slice(0,10)}.csv`);
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  downloadBtn.onmouseover = () => downloadBtn.style.background = '#059669';
+  downloadBtn.onmouseout = () => downloadBtn.style.background = '#10b981';
+  
   getBtn.onmouseover = () => getBtn.style.background = '#0066cc';
   getBtn.onmouseout = () => getBtn.style.background = '#0a84ff';
   
@@ -186,6 +274,8 @@
     const urls = urlsRaw.split(/[\n,]+/).map(u => u.trim()).filter(Boolean);
     
     resultsDiv.innerHTML = '';
+    schemaData = [];
+    downloadBtn.style.display = 'none';
     
     if(urls.length === 0) {
       resultsDiv.innerHTML = '<p style="color:#f59e0b;text-align:center;padding:20px;">⚠️ Por favor ingresa al menos una URL.</p>';
@@ -196,7 +286,7 @@
     getBtn.innerHTML = '⏳ Procesando...';
     getBtn.style.opacity = '0.6';
 
-   
+    // Crear todos los acordeones primero
     const accordions = urls.map(url => {
       const accordion = document.createElement('div');
       accordion.style.cssText = 'margin-bottom:12px;border:1px solid #333;border-radius:8px;overflow:hidden;';
@@ -231,7 +321,7 @@
       return { url, content, status };
     });
 
-  
+    // Procesar todas las URLs en paralelo
     await Promise.all(accordions.map(async ({ url, content, status }) => {
       const startTime = Date.now();
       const schemaHTML = await fetchSchema(url);
@@ -239,7 +329,37 @@
       
       content.innerHTML = schemaHTML;
       
-      if (schemaHTML.includes('✅')) {
+      // Extraer datos para CSV
+      const success = schemaHTML.includes('✅');
+      let schemas = [];
+      
+      if (success) {
+        // Intentar extraer los schemas del HTML generado
+        const matches = schemaHTML.match(/<pre[^>]*>([\s\S]*?)<\/pre>/gi);
+        if (matches) {
+          schemas = matches.map(m => {
+            const jsonText = m.replace(/<[^>]*>/g, '');
+            try {
+              const obj = JSON.parse(jsonText);
+              return {
+                type: obj['@type'] || obj.type || 'Unknown',
+                data: obj
+              };
+            } catch(e) {
+              return { type: 'Error', data: {} };
+            }
+          });
+        }
+      }
+      
+      schemaData.push({
+        url,
+        success,
+        schemas,
+        loadTime
+      });
+      
+      if (success) {
         status.innerHTML = `✅ ${loadTime}s`;
         status.style.color = '#10b981';
       } else {
@@ -251,8 +371,13 @@
     getBtn.disabled = false;
     getBtn.innerHTML = '🚀 Obtener Schemas';
     getBtn.style.opacity = '1';
+    
+    // Mostrar botón de descarga si hay datos
+    if (schemaData.length > 0) {
+      downloadBtn.style.display = 'block';
+    }
   };
 
-
+  // Auto-analizar página actual al abrir
   currentPageBtn.click();
 })();
