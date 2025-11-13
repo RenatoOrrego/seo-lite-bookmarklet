@@ -1,4 +1,4 @@
-javascript:(function(){
+(function(){
   // Función para extraer schemas de la página actual
   function extractCurrentPageSchemas() {
     const scripts = document.querySelectorAll('script[type="application/ld+json"]');
