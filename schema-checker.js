@@ -127,7 +127,7 @@
   popup.innerHTML = `
     <div style="background:#0a84ff;padding:15px;display:flex;justify-content:space-between;align-items:center;border-radius:12px 12px 0 0;">
       <h3 style="margin:0;font-size:16px;display:flex;align-items:center;gap:8px;">
-        🧩 Schema Viewer
+        🧩 Schema Viewer - By Tato
       </h3>
       <button id="closeSchemas" style="background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:6px;cursor:pointer;width:28px;height:28px;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">✖</button>
     </div>
