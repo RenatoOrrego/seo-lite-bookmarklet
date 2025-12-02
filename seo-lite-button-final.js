@@ -177,7 +177,7 @@
     const lang = document.documentElement.lang || 'No especificado';
     const words = (document.body?.innerText || '').trim().split(/\s+/).filter(Boolean).length;
     
-    const titleStatus = title.length >= 30 && title.length <= 60 ? 
+    const titleStatus = title.length >= 30 && title.length <= 70 ? 
       `<span class="ok">✓ Óptimo</span>` : 
       `<span class="warn">⚠ ${title.length < 30 ? 'Muy corto' : 'Muy largo'}</span>`;
     
